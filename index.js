@@ -52,7 +52,7 @@ class ClientKitTask {
     done(null, results);
   }
 
-  process(file, done) {
+  process(input, output, done) {
     done();
   }
 
