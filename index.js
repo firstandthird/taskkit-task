@@ -21,6 +21,10 @@ class ClientKitTask {
     });
   }
 
+  updateOptions(newOptions) {
+    this.options = newOptions;
+  }
+
   execute(allDone) {
     if (!this.options.files) {
       return allDone();
