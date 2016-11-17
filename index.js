@@ -3,6 +3,7 @@ const async = require('async');
 const Logr = require('logr');
 const path = require('path');
 const fs = require('fs');
+const bytesize = require('bytesize');
 
 class ClientKitTask {
   constructor(name, options, runner) {
@@ -61,9 +62,10 @@ class ClientKitTask {
       this.log(['clientkit', 'warning'], `attempting to write empty string to ${filename}`);
     }
     const output = path.join(this.options.dist, filename);
-    this.log(['info'], `Writing file ${output}`);
     //TODO: better check of stream
     if (typeof contents === 'string') {
+      const size = bytesize.stringSize(contents, true);
+      this.log(['info'], `Writing file ${filename} (${size})`);
       fs.writeFile(output, contents, done);
     } else {
       const fileStream = fs.createWriteStream(output);
@@ -73,7 +75,13 @@ class ClientKitTask {
         this.emit('end');
       });
       fileStream.on('finish', () => {
-        done();
+        bytesize.fileSize(output, true, (err, size) => {
+          if (err) {
+            return done(err);
+          }
+          this.log(['info'], `Writing file ${filename} (${size})`);
+          done();
+        });
       });
       contents.pipe(fileStream);
     }
