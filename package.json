@@ -1,0 +1,35 @@
+{
+  "name": "clientkit-task",
+  "version": "0.0.1",
+  "description": "Class to use for creating ClientKit tasks",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/firstandthird/clientkit-task.git"
+  },
+  "keywords": [
+    "clientkit"
+  ],
+  "author": "First+Third <code@firstandthird.com> (http://firstandthird.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/firstandthird/clientkit-task/issues"
+  },
+  "homepage": "https://github.com/firstandthird/clientkit-task#readme",
+  "dependencies": {
+    "async": "^2.1.2",
+    "logr": "^1.14.0"
+  },
+  "devDependencies": {
+    "eslint": "^3.10.2",
+    "eslint-config-firstandthird": "^3.0.2",
+    "eslint-plugin-import": "^2.2.0"
+  },
+  "eslintConfig": {
+    "extends": "firstandthird"
+  }
+}
