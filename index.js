@@ -27,7 +27,8 @@ class ClientKitTask {
   }
 
   execute(allDone) {
-    if (!this.options.files) {
+    const items = this.options.files || this.options.items;
+    if (!items) {
       return allDone();
     }
     if (this.options.enabled === false) {
@@ -35,10 +36,10 @@ class ClientKitTask {
       return allDone();
     }
     const allStart = new Date().getTime();
-    const filenames = Object.keys(this.options.files);
+    const filenames = Object.keys(items);
     async.map(filenames, (filename, next) => {
       const start = new Date().getTime();
-      this.process(this.options.files[filename], filename, (err, results) => {
+      this.process(items[filename], filename, (err, results) => {
         if (err) {
           return next(err);
         }
