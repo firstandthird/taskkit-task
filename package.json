@@ -23,7 +23,7 @@
   "dependencies": {
     "async": "^2.1.2",
     "bytesize": "^0.2.0",
-    "logr": "^1.14.0"
+    "logr": "1.15.0"
   },
   "devDependencies": {
     "eslint": "^3.10.2",

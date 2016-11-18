@@ -15,7 +15,8 @@ class ClientKitTask {
       type: 'cli',
       renderOptions: {
         cli: {
-          lineColor: options.logColor || 'cyan'
+          prefix: `${name} | `,
+          prefixColor: options.logColor || 'cyan'
         }
       }
     });
