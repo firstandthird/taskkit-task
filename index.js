@@ -29,6 +29,10 @@ class ClientKitTask {
     if (!this.options.files) {
       return allDone();
     }
+    if (this.options.enabled === false) {
+      this.log(`${this.name} skipped because it is disabled`);
+      return allDone();
+    }
     const allStart = new Date().getTime();
     const filenames = Object.keys(this.options.files);
     async.map(filenames, (filename, next) => {
