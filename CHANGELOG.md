@@ -1,4 +1,10 @@
 
+0.0.5 / 2016-11-18
+==================
+
+  * support both files and items key (where files doesn't make sense)
+  * updated logr and set log to prefix with task name
+
 0.0.4 / 2016-11-18
 ==================
 
