@@ -3,15 +3,20 @@ const async = require('async');
 const Logr = require('logr');
 const path = require('path');
 const fs = require('fs');
+const defaults = require('lodash.defaults');
 const bytesize = require('bytesize');
+
+let DefaultOptions = {
+  description: 'Default ClientKitTask Description',
+};
 
 class ClientKitTask {
   constructor(name, options, runner) {
-    options = options || {};
     this.name = name;
-    this.options = options;
-    this.runner = runner;
-    this.log = new Logr({
+    this.options = defaults(options, DefaultOptions);
+    // log method can be over-ridden either per-instance
+    // or globally in DefaultOptions:
+    this.log = options.log ? options.log : new Logr({
       type: 'cli',
       renderOptions: {
         cli: {
@@ -20,6 +25,7 @@ class ClientKitTask {
         }
       }
     });
+    this.runner = runner;
   }
 
   updateOptions(newOptions) {
@@ -97,5 +103,9 @@ class ClientKitTask {
     }
   }
 }
+// over-rides DefaultOptions for all instances of ClientKitTask:
+ClientKitTask.setDefaultOptions = (options) => {
+  DefaultOptions = options;
+};
 
 module.exports = ClientKitTask;
