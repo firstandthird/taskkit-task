@@ -80,7 +80,7 @@ class ClientKitTask {
     if (!contents) {
       this.log(['clientkit', 'warning'], `attempting to write empty string to ${filename}`);
     }
-    const output = path.join(this.options.dist, filename);
+    const output = path.join(this.options.dist || '', filename);
     //TODO: better check of stream
     if (typeof contents === 'string') {
       const size = bytesize.stringSize(contents, true);
