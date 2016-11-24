@@ -3,23 +3,32 @@ const async = require('async');
 const Logr = require('logr');
 const path = require('path');
 const fs = require('fs');
+const defaults = require('lodash.defaults');
 const bytesize = require('bytesize');
+
 
 class ClientKitTask {
   constructor(name, options, runner) {
-    options = options || {};
     this.name = name;
-    this.options = options;
-    this.runner = runner;
-    this.log = new Logr({
+    this.options = defaults(options, this.defaultOptions);
+    this.log = this.options.log ? this.options.log : new Logr({
       type: 'cli',
       renderOptions: {
         cli: {
           prefix: `${name} | `,
-          prefixColor: options.logColor || 'cyan'
+          prefixColor: this.options.logColor || 'cyan'
         }
       }
     });
+    this.runner = runner;
+  }
+  // your custom tasks can define their own default options:
+  get defaultOptions() {
+    return {};
+  }
+  // your custom tasks can define their own description:
+  get description() {
+    return '';
   }
 
   updateOptions(newOptions) {
