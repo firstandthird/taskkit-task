@@ -1,4 +1,12 @@
 
+0.0.6 / 2016-11-24
+==================
+
+  * remove logr depedency, logr instance gets passed in via options now
+  * works if dist isn't set
+  * defaultOptions is class property with getter
+  * able to set default options
+
 0.0.5 / 2016-11-18
 ==================
 
