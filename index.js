@@ -1,6 +1,5 @@
 'use strict';
 const async = require('async');
-const Logr = require('logr');
 const path = require('path');
 const fs = require('fs');
 const defaults = require('lodash.defaults');
@@ -11,15 +10,6 @@ class ClientKitTask {
   constructor(name, options, runner) {
     this.name = name;
     this.options = defaults(options, this.defaultOptions);
-    this.log = this.options.log ? this.options.log : new Logr({
-      type: 'cli',
-      renderOptions: {
-        cli: {
-          prefix: `${name} | `,
-          prefixColor: this.options.logColor || 'cyan'
-        }
-      }
-    });
     this.runner = runner;
   }
   // your custom tasks can define their own default options:
@@ -29,6 +19,19 @@ class ClientKitTask {
   // your custom tasks can define their own description:
   get description() {
     return '';
+  }
+
+  log(tags, message) {
+    if (!message) {
+      message = tags;
+      tags = [];
+    }
+    tags = [this.name].concat(tags);
+    if (!this.options.log) {
+      console.log(tags, message); //eslint-disable-line no-console
+    } else {
+      this.options.log(tags, message);
+    }
   }
 
   updateOptions(newOptions) {
@@ -78,13 +81,13 @@ class ClientKitTask {
 
   write(filename, contents, done) {
     if (!contents) {
-      this.log(['clientkit', 'warning'], `attempting to write empty string to ${filename}`);
+      this.log(['warning'], `attempting to write empty string to ${filename}`);
     }
     const output = path.join(this.options.dist || '', filename);
     //TODO: better check of stream
     if (typeof contents === 'string') {
       const size = bytesize.stringSize(contents, true);
-      this.log(['info'], `Writing file ${filename} (${size})`);
+      this.log(`Writing file ${filename} (${size})`);
       fs.writeFile(output, contents, done);
     } else {
       const fileStream = fs.createWriteStream(output);
@@ -98,7 +101,7 @@ class ClientKitTask {
           if (err) {
             return done(err);
           }
-          this.log(['info'], `Writing file ${filename} (${size})`);
+          this.log(`Writing file ${filename} (${size})`);
           done();
         });
       });
