@@ -8,10 +8,11 @@ const version = require('./package.json').version;
 
 
 class ClientKitTask {
-  constructor(name, options, runner) {
+  constructor(name, options, runner, logger) {
     this.name = name;
     this.options = defaults(options, this.defaultOptions);
     this.runner = runner;
+    this.logger = logger;
   }
   // your custom tasks can define their own default options:
   get defaultOptions() {
@@ -32,10 +33,10 @@ class ClientKitTask {
       tags = [];
     }
     tags = [this.name].concat(tags);
-    if (!this.options.log) {
+    if (!this.logger) {
       console.log(tags, message); //eslint-disable-line no-console
     } else {
-      this.options.log(tags, message);
+      this.logger(tags, message);
     }
   }
 
