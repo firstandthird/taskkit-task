@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const defaults = require('lodash.defaults');
 const bytesize = require('bytesize');
+const version = require('./package.json').version;
 
 
 class ClientKitTask {
@@ -19,6 +20,10 @@ class ClientKitTask {
   // your custom tasks can define their own description:
   get description() {
     return '';
+  }
+
+  get clientkitVersion() {
+    return version;
   }
 
   log(tags, message) {
