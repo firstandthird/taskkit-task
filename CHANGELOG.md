@@ -1,4 +1,10 @@
 
+0.0.7 / 2016-12-16
+==================
+
+  * pass in logger as separate arg instead of argument
+  * added clientkitVersion prop
+
 0.0.6 / 2016-11-24
 ==================
 
