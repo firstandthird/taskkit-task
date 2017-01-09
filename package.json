@@ -23,7 +23,8 @@
   "dependencies": {
     "async": "2.1.4",
     "bytesize": "0.2.0",
-    "lodash.defaults": "4.2.0"
+    "lodash.defaults": "4.2.0",
+    "mkdirp": "0.5.1"
   },
   "devDependencies": {
     "eslint": "3.13.1",

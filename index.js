@@ -5,6 +5,7 @@ const fs = require('fs');
 const defaults = require('lodash.defaults');
 const bytesize = require('bytesize');
 const version = require('./package.json').version;
+const mkdirp = require('mkdirp');
 
 
 class ClientKitTask {
@@ -85,34 +86,49 @@ class ClientKitTask {
     done();
   }
 
-  write(filename, contents, done) {
+  write(filename, contents, allDone) {
     if (!contents) {
       this.log(['warning'], `attempting to write empty string to ${filename}`);
     }
+    const self = this;
     const output = path.join(this.options.dist || '', filename);
-    //TODO: better check of stream
-    if (typeof contents === 'string') {
-      const size = bytesize.stringSize(contents, true);
-      this.log(`Writing file ${filename} (${size})`);
-      fs.writeFile(output, contents, done);
-    } else {
-      const fileStream = fs.createWriteStream(output);
-      const self = this;
-      contents.on('error', function (err) {
-        self.log(['error'], err);
-        this.emit('end');
-      });
-      fileStream.on('finish', () => {
-        bytesize.fileSize(output, true, (err, size) => {
-          if (err) {
-            return done(err);
-          }
-          this.log(`Writing file ${filename} (${size})`);
-          done();
-        });
-      });
-      contents.pipe(fileStream);
-    }
+    const outputDir = path.dirname(output);
+
+    async.autoInject({
+      mkdir(done) {
+        if (!outputDir) {
+          return done();
+        }
+        mkdirp(outputDir, done);
+      },
+      write(mkdir, done) {
+        //TODO: better check of stream
+        if (typeof contents === 'string') {
+          const size = bytesize.stringSize(contents, true);
+          self.log(`Writing file ${filename} (${size})`);
+          fs.writeFile(output, contents, done);
+        } else {
+          const fileStream = fs.createWriteStream(output);
+          contents.on('error', function (err) {
+            self.log(['error'], err);
+            this.emit('end');
+          });
+          fileStream.on('finish', done);
+          contents.pipe(fileStream);
+        }
+      },
+      size(write, done) {
+        if (typeof contents === 'string') {
+          const size = bytesize.stringSize(contents, true);
+          return done(null, size);
+        }
+        bytesize.fileSize(output, true, done);
+      },
+      log(size, done) {
+        self.log(`Writing file ${filename} (${size})`);
+        done();
+      }
+    }, allDone);
   }
 }
 
