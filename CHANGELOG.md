@@ -1,4 +1,10 @@
 
+0.0.8 / 2017-01-09
+==================
+
+  * create output directory automatically
+  * updated depedencies
+
 0.0.7 / 2016-12-16
 ==================
 
