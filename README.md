@@ -1,2 +1,2 @@
-# clientkit-task
-Class to use for creating ClientKit tasks
+# runkit-task
+Class to use for creating RunKit tasks

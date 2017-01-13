@@ -7,7 +7,7 @@ const bytesize = require('bytesize');
 const mkdirp = require('mkdirp');
 
 
-class ClientKitTask {
+class RunKitTask {
   constructor(name, options, kit) {
     this.name = name;
     this.options = defaults(options, this.defaultOptions);
@@ -130,4 +130,4 @@ class ClientKitTask {
   }
 }
 
-module.exports = ClientKitTask;
+module.exports = RunKitTask;

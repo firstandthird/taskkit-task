@@ -1,7 +1,7 @@
 {
-  "name": "clientkit-task",
+  "name": "runkit-task",
   "version": "0.0.9",
-  "description": "Class to use for creating ClientKit tasks",
+  "description": "Class to use for creating runkit tasks",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,17 +9,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/firstandthird/clientkit-task.git"
+    "url": "git+https://github.com/firstandthird/runkit-task.git"
   },
   "keywords": [
-    "clientkit"
+    "clientkit",
+    "runkit"
   ],
   "author": "First+Third <code@firstandthird.com> (http://firstandthird.com/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/firstandthird/clientkit-task/issues"
+    "url": "https://github.com/firstandthird/runkit-task/issues"
   },
-  "homepage": "https://github.com/firstandthird/clientkit-task#readme",
+  "homepage": "https://github.com/firstandthird/runkit-task#readme",
   "dependencies": {
     "async": "2.1.4",
     "bytesize": "0.2.0",
