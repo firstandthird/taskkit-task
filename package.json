@@ -1,6 +1,6 @@
 {
   "name": "clientkit-task",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Class to use for creating ClientKit tasks",
   "main": "index.js",
   "scripts": {

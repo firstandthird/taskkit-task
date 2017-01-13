@@ -1,4 +1,11 @@
 
+0.0.9 / 2017-01-13
+==================
+
+  * pass in kit object instead of separate arguments.
+  * added init function to hook into instead of overwriting constructor
+  * chore(package): update eslint-config-firstandthird to version 3.2.0
+
 0.0.8 / 2017-01-09
 ==================
 
