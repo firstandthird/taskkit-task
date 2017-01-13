@@ -1,6 +1,6 @@
 {
   "name": "runkit-task",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Class to use for creating runkit tasks",
   "main": "index.js",
   "scripts": {
