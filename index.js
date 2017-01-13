@@ -4,16 +4,15 @@ const path = require('path');
 const fs = require('fs');
 const defaults = require('lodash.defaults');
 const bytesize = require('bytesize');
-const version = require('./package.json').version;
 const mkdirp = require('mkdirp');
 
 
 class ClientKitTask {
-  constructor(name, options, runner, logger) {
+  constructor(name, options, kit) {
     this.name = name;
     this.options = defaults(options, this.defaultOptions);
-    this.runner = runner;
-    this.logger = logger;
+    this.kit = kit;
+    this.init();
   }
   // your custom tasks can define their own default options:
   get defaultOptions() {
@@ -24,8 +23,7 @@ class ClientKitTask {
     return '';
   }
 
-  get clientkitVersion() {
-    return version;
+  init() {
   }
 
   log(tags, message) {
@@ -34,10 +32,10 @@ class ClientKitTask {
       tags = [];
     }
     tags = [this.name].concat(tags);
-    if (!this.logger) {
+    if (!this.kit.logger) {
       console.log(tags, message); //eslint-disable-line no-console
     } else {
-      this.logger(tags, message);
+      this.kit.logger(tags, message);
     }
   }
 
