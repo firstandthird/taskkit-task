@@ -158,8 +158,8 @@ test('writes files to dist directory ', (t) => {
     t.equal(err, null);
     fs.exists('test/dist/output.txt', (exists) => {
       t.equal(exists, true);
-      fs.readFile('test/dist/output.txt', (err, data) => {
-        t.equal(err, null);
+      fs.readFile('test/dist/output.txt', (err2, data) => {
+        t.equal(err2, null);
         t.equal(data.toString(), 'contents');
       });
     });
