@@ -1,14 +1,14 @@
 'use strict';
 const test = require('tape');
-const RunKitTask = require('../index.js');
+const TaskKitTask = require('../index.js');
 const fs = require('fs');
 test('can be constructed', (t) => {
   const kit = {};
   const options = {
     x: 1
   };
-  const task = new RunKitTask('test', options, kit);
-  t.equal(task instanceof RunKitTask, true);
+  const task = new TaskKitTask('test', options, kit);
+  t.equal(task instanceof TaskKitTask, true);
   t.equal(task.name, 'test');
   t.equal(task.kit, kit);
   t.equal(task.options.x, 1);
@@ -16,7 +16,7 @@ test('can be constructed', (t) => {
 });
 
 test('calls init when constructed', (t) => {
-  class Test extends RunKitTask {
+  class Test extends TaskKitTask {
     init() {
       t.end();
     }
@@ -25,9 +25,9 @@ test('calls init when constructed', (t) => {
 });
 
 test('can get default options', (t) => {
-  const defaultTask = new RunKitTask('test', {}, {});
+  const defaultTask = new TaskKitTask('test', {}, {});
   t.equal(defaultTask.defaultOptions.x, undefined);
-  class Test extends RunKitTask {
+  class Test extends TaskKitTask {
     get defaultOptions() {
       return { x: 1 };
     }
@@ -38,9 +38,9 @@ test('can get default options', (t) => {
 });
 
 test('can get description ', (t) => {
-  const defaultTask = new RunKitTask('test', {}, {});
+  const defaultTask = new TaskKitTask('test', {}, {});
   t.equal(defaultTask.description, '');
-  class Test extends RunKitTask {
+  class Test extends TaskKitTask {
     get description() {
       return 'a test task';
     }
@@ -59,7 +59,7 @@ test('logs messages with logger provided by kit', (t) => {
       t.end();
     }
   };
-  const task = new RunKitTask('test', {}, kit);
+  const task = new TaskKitTask('test', {}, kit);
   task.log([], 'hello');
 });
 
@@ -72,12 +72,12 @@ test('logs messages with default console.log if logger not provided by kit', (t)
     t.equal(passedMessages, 'hello');
     t.end();
   };
-  const task = new RunKitTask('test', {}, {});
+  const task = new TaskKitTask('test', {}, {});
   task.log([], 'hello');
 });
 
 test('updates options ', (t) => {
-  const task = new RunKitTask('test', {}, {});
+  const task = new TaskKitTask('test', {}, {});
   task.updateOptions({ x: 1 });
   t.equal(task.options.x, 1);
   t.end();
@@ -85,7 +85,7 @@ test('updates options ', (t) => {
 
 test('execute -- will not fire if no items / files passed', (t) => {
   t.plan(1);
-  const task = new RunKitTask('test', {
+  const task = new TaskKitTask('test', {
     items: []
   }, {});
   task.process = () => {
@@ -103,7 +103,7 @@ test('execute -- can be disabled', (t) => {
       t.equal(passedMessages, 'test skipped because it is disabled');
     }
   };
-  const task = new RunKitTask('test', {
+  const task = new TaskKitTask('test', {
     items: [],
     enabled: false
   }, kit);
@@ -113,7 +113,7 @@ test('execute -- can be disabled', (t) => {
 
 test('execute -- will fire process on items in list', (t) => {
   t.plan(3);
-  const task = new RunKitTask('test', {
+  const task = new TaskKitTask('test', {
     items: {
       output1: 'input1'
     }
@@ -130,7 +130,7 @@ test('execute -- will fire process on items in list', (t) => {
 
 test('fires onFinish event ', (t) => {
   t.plan(3);
-  class Test extends RunKitTask {
+  class Test extends TaskKitTask {
     onFinish(results, done) {
       t.equal(results.length, 1);
       t.equal(results[0], undefined);
@@ -149,7 +149,7 @@ test('fires onFinish event ', (t) => {
 
 test('writes files to dist directory ', (t) => {
   t.plan(4);
-  const task = new RunKitTask('test', {
+  const task = new TaskKitTask('test', {
     dist: 'test/dist',
     items: {
       output1: 'input1'
