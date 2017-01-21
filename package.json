@@ -1,25 +1,25 @@
 {
-  "name": "runkit-task",
+  "name": "taskkit-task",
   "version": "0.0.10",
-  "description": "Class to use for creating runkit tasks",
+  "description": "Class to use for creating taskkit tasks",
   "main": "index.js",
   "scripts": {
     "test": "tape test/**.js | tap-spec"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/firstandthird/runkit-task.git"
+    "url": "git+https://github.com/firstandthird/taskkit-task.git"
   },
   "keywords": [
     "clientkit",
-    "runkit"
+    "taskkit"
   ],
   "author": "First+Third <code@firstandthird.com> (http://firstandthird.com/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/firstandthird/runkit-task/issues"
+    "url": "https://github.com/firstandthird/taskkit-task/issues"
   },
-  "homepage": "https://github.com/firstandthird/runkit-task#readme",
+  "homepage": "https://github.com/firstandthird/taskkit-task#readme",
   "dependencies": {
     "async": "2.1.4",
     "bytesize": "0.2.0",
