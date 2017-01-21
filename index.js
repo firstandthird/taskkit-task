@@ -11,7 +11,7 @@ class TaskKitTask {
   constructor(name, options, kit) {
     this.name = name;
     this.options = defaults(options, this.defaultOptions);
-    this.kit = kit;
+    this.kit = kit || {};
     this.init();
   }
   // your custom tasks can define their own default options:
