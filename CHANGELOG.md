@@ -1,4 +1,11 @@
 
+0.0.11 / 2017-01-20
+==================
+
+  * set kit to {} if not passed in
+  * renake to taskkit-task
+  * add tape tests
+
 0.0.10 / 2017-01-13
 ==================
 
