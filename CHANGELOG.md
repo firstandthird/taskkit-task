@@ -1,4 +1,11 @@
 
+0.0.12 / 2017-01-27
+==================
+
+  * removed log of all processed - now handled by taskkit
+  * warning if no files passed in
+  * swap lodash.defaults with aug to fix deep merging of options
+
 0.0.11 / 2017-01-20
 ==================
 
