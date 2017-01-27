@@ -37,6 +37,34 @@ test('can get default options', (t) => {
   t.end();
 });
 
+test('merge nested options', (t) => {
+  class Task extends TaskKitTask {
+    get defaultOptions() {
+      return {
+        a: {
+          b: 123,
+          c: 456
+        },
+        debug: false
+      };
+    }
+  }
+  const options = {
+    a: {
+      b: 456
+    }
+  };
+  const task = new Task('task', options, {});
+  t.deepEqual(task.options, {
+    a: {
+      b: 456,
+      c: 456
+    },
+    debug: false
+  });
+  t.end();
+});
+
 test('can get description ', (t) => {
   const defaultTask = new TaskKitTask('test', {}, {});
   t.equal(defaultTask.description, '');

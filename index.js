@@ -2,7 +2,7 @@
 const async = require('async');
 const path = require('path');
 const fs = require('fs');
-const defaults = require('lodash.defaults');
+const aug = require('aug');
 const bytesize = require('bytesize');
 const mkdirp = require('mkdirp');
 
@@ -10,7 +10,7 @@ const mkdirp = require('mkdirp');
 class TaskKitTask {
   constructor(name, options, kit) {
     this.name = name;
-    this.options = defaults(options, this.defaultOptions);
+    this.options = aug('deep', {}, this.defaultOptions, options);
     this.kit = kit || {};
     this.init();
   }

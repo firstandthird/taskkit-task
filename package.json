@@ -22,8 +22,8 @@
   "homepage": "https://github.com/firstandthird/taskkit-task#readme",
   "dependencies": {
     "async": "2.1.4",
+    "aug": "^1.0.2",
     "bytesize": "0.2.0",
-    "lodash.defaults": "4.2.0",
     "mkdirp": "0.5.1"
   },
   "devDependencies": {
