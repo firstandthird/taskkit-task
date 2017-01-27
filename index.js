@@ -53,7 +53,6 @@ class TaskKitTask {
       this.log(`${this.name} skipped because it is disabled`);
       return allDone();
     }
-    const allStart = new Date().getTime();
     const filenames = Object.keys(items);
     async.map(filenames, (filename, next) => {
       const start = new Date().getTime();
@@ -70,9 +69,6 @@ class TaskKitTask {
       if (err) {
         return allDone(err);
       }
-      const allEnd = new Date().getTime();
-      const duration = (allEnd - allStart) / 1000;
-      this.log(`Processed all ${this.name} in ${duration} sec`);
       this.onFinish(results, allDone);
     });
   }
