@@ -46,6 +46,7 @@ class TaskKitTask {
   execute(allDone) {
     const items = this.options.files || this.options.items;
     if (!items) {
+      this.log(['warning'], 'No input files, skipping');
       return allDone();
     }
     if (this.options.enabled === false) {
