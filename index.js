@@ -99,8 +99,6 @@ class TaskKitTask {
       write(mkdir, done) {
         //TODO: better check of stream
         if (typeof contents === 'string') {
-          const size = bytesize.stringSize(contents, true);
-          self.log(`Writing file ${filename} (${size})`);
           fs.writeFile(output, contents, done);
         } else {
           const fileStream = fs.createWriteStream(output);
