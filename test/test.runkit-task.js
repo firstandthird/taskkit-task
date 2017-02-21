@@ -194,3 +194,33 @@ test('writes files to dist directory ', (t) => {
     });
   });
 });
+
+test('writeMany files to dist directory ', (t) => {
+  t.plan(7);
+  const task = new TaskKitTask('test', {
+    dist: 'test/dist',
+    items: {
+      output1: 'input1'
+    }
+  }, {});
+  task.writeMany({
+    'output1.txt': 'contents1',
+    'output2.txt': 'contents2'
+  }, (err, outcome) => {
+    t.equal(err, null);
+    fs.exists('test/dist/output1.txt', (exists) => {
+      t.equal(exists, true);
+      fs.readFile('test/dist/output1.txt', (err2, data) => {
+        t.equal(err2, null);
+        t.equal(data.toString(), 'contents1');
+        fs.exists('test/dist/output2.txt', (exists2) => {
+          t.equal(exists2, true);
+          fs.readFile('test/dist/output2.txt', (err3, data2) => {
+            t.equal(err3, null);
+            t.equal(data2.toString(), 'contents2');
+          });
+        });
+      });
+    });
+  });
+});
