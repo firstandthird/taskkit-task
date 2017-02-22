@@ -195,6 +195,38 @@ test('writes files to dist directory ', (t) => {
   });
 });
 
+test('handles input as object', (t) => {
+  const task = new TaskKitTask('test', {
+    files: {
+      outputAsObject: {
+        input: 'inputFromObject1',
+        glop: true
+      },
+      outputAsObject2: {
+        input: 'inputFromObject1',
+        glyf: 'moe'
+      }
+    }
+  }, {});
+  // use 'delay' so the first process ends after the second:
+  let delay = 2000;
+  task.process = (input, output, options, done) => {
+    setTimeout(() => {
+      done(null, Object.keys(options));
+    }, delay);
+    delay = 10;
+  };
+  task.execute((err, val) => {
+    t.equal(err, null);
+    t.equal(val.length, 2, 'handles files specified as objects');
+    t.equal(val[0].length, 2, 'options are correct during process');
+    t.equal(val[1].length, 2, 'options are correct during process');
+    t.equal(val[0][1], 'glop', 'options are correct during process');
+    t.equal(val[1][1], 'glyf', 'options are correct during process');
+    t.end();
+  });
+});
+
 test('writeMany files to dist directory ', (t) => {
   t.plan(7);
   const task = new TaskKitTask('test', {

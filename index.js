@@ -54,17 +54,37 @@ class TaskKitTask {
       return allDone();
     }
     const filenames = Object.keys(items);
-    async.map(filenames, (filename, next) => {
+    const originalOptions = this.options;
+    // must be done sequentially so that this.options does not get changed
+    // in between calls to .process:
+    async.map(filenames, (outputFile, eachDone) => {
+      const item = items[outputFile];
+      const inputName = typeof item === 'object' ? item.input : item;
       const start = new Date().getTime();
-      this.process(items[filename], filename, (err, results) => {
+      const processDone = (err, results) => {
         if (err) {
-          return next(err);
+          return eachDone(err);
         }
         const end = new Date().getTime();
         const duration = (end - start) / 1000;
-        this.log(`Processed ${filename} in ${duration} sec`);
-        next(null, results);
-      });
+        this.log(`Processed ${outputFile} in ${duration} sec`);
+        eachDone(null, results);
+      };
+      // if process was designed to take in a local options param:
+      if (this.process.length === 3) {
+        return this.process(inputName, outputFile, processDone);
+      }
+      // make sure we have fresh options:
+      const options = Object.assign({}, originalOptions);
+      // if item is an object, copy over all keys as options except 'input':
+      if (typeof item === 'object') {
+        Object.keys(item).forEach((key) => {
+          if (key !== 'input') {
+            options[key] = item[key];
+          }
+        });
+      }
+      this.process(inputName, outputFile, options, processDone);
     }, (err, results) => {
       if (err) {
         return allDone(err);
@@ -77,7 +97,10 @@ class TaskKitTask {
     done(null, results);
   }
 
-  process(input, output, done) {
+  process(input, output, options, done) {
+    if (typeof options === 'function') {
+      done = options;
+    }
     done();
   }
 
