@@ -2,6 +2,7 @@
 const test = require('tape');
 const TaskKitTask = require('../index.js');
 const fs = require('fs');
+
 test('can be constructed', (t) => {
   const kit = {};
   const options = {
@@ -254,5 +255,22 @@ test('writeMany files to dist directory ', (t) => {
         });
       });
     });
+  });
+});
+
+test('parallel execute -- will fire process on items in list in separate process', (t) => {
+  const task = new TaskKitTask('test', {
+    multithread: true,
+    items: {
+      output1: 'input1'
+    }
+  }, {});
+  task.process = (input, output, done) => {
+    // this takes place in a child_process
+    done(null, 123);
+  };
+  task.execute((err, res) => {
+    t.equal(err, null);
+    t.end();
   });
 });
