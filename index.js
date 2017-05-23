@@ -56,7 +56,7 @@ class TaskKitTask {
       tags = [];
     }
     tags = [this.name].concat(tags);
-    this.log(tags, message); //eslint-disable-line no-console
+    this.log(tags, message);
   }
 
   updateOptions(newOptions) {
