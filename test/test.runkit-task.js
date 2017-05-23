@@ -79,32 +79,6 @@ test('can get description ', (t) => {
   t.end();
 });
 
-test('logs messages with logger provided by kit', (t) => {
-  const kit = {
-    logger: (passedTags, passedMessages) => {
-      t.equal(passedTags.length, 1);
-      t.equal(passedTags[0], 'test');
-      t.equal(passedMessages, 'hello');
-      t.end();
-    }
-  };
-  const task = new TaskKitTask('test', {}, kit);
-  task.log([], 'hello');
-});
-
-test('logs messages with default console.log if logger not provided by kit', (t) => {
-  const oldLog = console.log;
-  console.log = (passedTags, passedMessages) => {
-    console.log = oldLog;
-    t.equal(passedTags.length, 1);
-    t.equal(passedTags[0], 'test');
-    t.equal(passedMessages, 'hello');
-    t.end();
-  };
-  const task = new TaskKitTask('test', {}, {});
-  task.log([], 'hello');
-});
-
 test('updates options ', (t) => {
   const task = new TaskKitTask('test', {}, {});
   task.updateOptions({ x: 1 });
@@ -126,17 +100,18 @@ test('execute -- will not fire if no items / files passed', (t) => {
 });
 
 test('execute -- can be disabled', (t) => {
-  t.plan(1);
-  const kit = {
-    logger: (passedTags, passedMessages) => {
-      t.equal(passedMessages, 'test skipped because it is disabled');
+  class DisabledTask extends TaskKitTask {
+    process() {
+      t.fail();
     }
-  };
-  const task = new TaskKitTask('test', {
+  }
+  const task = new DisabledTask('test', {
     items: [],
     enabled: false
-  }, kit);
+  }, {});
   task.execute(() => {
+    t.pass();
+    t.end();
   });
 });
 

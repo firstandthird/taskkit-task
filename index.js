@@ -6,6 +6,7 @@ const aug = require('aug');
 const bytesize = require('bytesize');
 const mkdirp = require('mkdirp');
 const spawn = require('threads').spawn;
+const Logr = require('logr');
 
 // a wrapper for running tasks in their own process:
 const runInParallel = (data, allDone) => {
@@ -21,6 +22,16 @@ class TaskKitTask {
     this.name = name;
     this.options = aug('deep', {}, this.defaultOptions, options);
     this.kit = kit || {};
+    this.log = Logr.createLogger({
+      reporters: {
+        cliFancy: {
+          reporter: require('logr-cli-fancy')
+        },
+        bell: {
+          reporter: require('logr-reporter-bell')
+        }
+      }
+    });
     this.init();
   }
   // returns the module to load when running in a separate process:
@@ -45,11 +56,7 @@ class TaskKitTask {
       tags = [];
     }
     tags = [this.name].concat(tags);
-    if (!this.kit.logger) {
-      console.log(tags, message); //eslint-disable-line no-console
-    } else {
-      this.kit.logger(tags, message);
-    }
+    this.log(tags, message); //eslint-disable-line no-console
   }
 
   updateOptions(newOptions) {
