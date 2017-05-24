@@ -23,6 +23,7 @@ class TaskKitTask {
     this.options = aug('deep', {}, this.defaultOptions, options);
     this.kit = kit || {};
     this.log = Logr.createLogger({
+      defaultTags: [name],
       reporters: {
         cliFancy: {
           reporter: require('logr-cli-fancy')
@@ -48,15 +49,6 @@ class TaskKitTask {
   }
 
   init() {
-  }
-
-  log(tags, message) {
-    if (!message) {
-      message = tags;
-      tags = [];
-    }
-    tags = [this.name].concat(tags);
-    this.log(tags, message);
   }
 
   updateOptions(newOptions) {
