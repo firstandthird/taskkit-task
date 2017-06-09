@@ -1,6 +1,6 @@
 {
   "name": "taskkit-task",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Class to use for creating taskkit tasks",
   "main": "index.js",
   "scripts": {
