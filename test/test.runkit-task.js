@@ -1,9 +1,9 @@
 'use strict';
-const test = require('tape');
+const tap = require('tap');
 const TaskKitTask = require('../index.js');
 const fs = require('fs');
 
-test('can be constructed', (t) => {
+tap.test('can be constructed', (t) => {
   const kit = {};
   const options = {
     x: 1
@@ -16,7 +16,7 @@ test('can be constructed', (t) => {
   t.end();
 });
 
-test('calls init when constructed', (t) => {
+tap.test('calls init when constructed', (t) => {
   class Test extends TaskKitTask {
     init() {
       t.end();
@@ -25,7 +25,7 @@ test('calls init when constructed', (t) => {
   const task = new Test('test', {}, {});
 });
 
-test('can get default options', (t) => {
+tap.test('can get default options', (t) => {
   const defaultTask = new TaskKitTask('test', {}, {});
   t.equal(defaultTask.defaultOptions.x, undefined);
   class Test extends TaskKitTask {
@@ -38,7 +38,7 @@ test('can get default options', (t) => {
   t.end();
 });
 
-test('merge nested options', (t) => {
+tap.test('merge nested options', (t) => {
   class Task extends TaskKitTask {
     get defaultOptions() {
       return {
@@ -66,7 +66,7 @@ test('merge nested options', (t) => {
   t.end();
 });
 
-test('can get description ', (t) => {
+tap.test('can get description ', (t) => {
   const defaultTask = new TaskKitTask('test', {}, {});
   t.equal(defaultTask.description, '');
   class Test extends TaskKitTask {
@@ -79,14 +79,14 @@ test('can get description ', (t) => {
   t.end();
 });
 
-test('updates options ', (t) => {
+tap.test('updates options ', (t) => {
   const task = new TaskKitTask('test', {}, {});
   task.updateOptions({ x: 1 });
   t.equal(task.options.x, 1);
   t.end();
 });
 
-test('execute -- will not fire if no items / files passed', (t) => {
+tap.test('execute -- will not fire if no items / files passed', (t) => {
   t.plan(1);
   const task = new TaskKitTask('test', {
     items: []
@@ -99,7 +99,7 @@ test('execute -- will not fire if no items / files passed', (t) => {
   });
 });
 
-test('execute -- can be disabled', (t) => {
+tap.test('execute -- can be disabled', (t) => {
   class DisabledTask extends TaskKitTask {
     process() {
       t.fail();
@@ -115,7 +115,7 @@ test('execute -- can be disabled', (t) => {
   });
 });
 
-test('execute -- will fire process on items in list', (t) => {
+tap.test('execute -- will fire process on items in list', (t) => {
   t.plan(3);
   const task = new TaskKitTask('test', {
     items: {
@@ -132,7 +132,7 @@ test('execute -- will fire process on items in list', (t) => {
   });
 });
 
-test('fires onFinish event ', (t) => {
+tap.test('fires onFinish event ', (t) => {
   t.plan(3);
   class Test extends TaskKitTask {
     onFinish(results, done) {
@@ -151,7 +151,7 @@ test('fires onFinish event ', (t) => {
   });
 });
 
-test('writes files to dist directory ', (t) => {
+tap.test('writes files to dist directory ', (t) => {
   t.plan(4);
   const task = new TaskKitTask('test', {
     dist: 'test/dist',
@@ -171,7 +171,7 @@ test('writes files to dist directory ', (t) => {
   });
 });
 
-test('handles input as object', (t) => {
+tap.test('handles input as object', (t) => {
   const task = new TaskKitTask('test', {
     files: {
       outputAsObject: {
@@ -203,7 +203,7 @@ test('handles input as object', (t) => {
   });
 });
 
-test('writeMany files to dist directory ', (t) => {
+tap.test('writeMany files to dist directory ', (t) => {
   t.plan(7);
   const task = new TaskKitTask('test', {
     dist: 'test/dist',
@@ -233,7 +233,7 @@ test('writeMany files to dist directory ', (t) => {
   });
 });
 
-test('parallel execute -- will fire process on items in list in separate process', (t) => {
+tap.test('parallel execute -- will fire process on items in list in separate process', (t) => {
   const task = new TaskKitTask('test', {
     multithread: true,
     items: {
