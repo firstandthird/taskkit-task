@@ -1,20 +1,21 @@
 'use strict';
-const async = require('async');
 const path = require('path');
 const fs = require('fs');
 const aug = require('aug');
 const bytesize = require('bytesize');
-const mkdirp = require('mkdirp');
+const mkdirp = require('mkdirp-promise');
 const spawn = require('threads').spawn;
 const Logr = require('logr');
+const util = require('util');
 
 // a wrapper for running tasks in their own process:
-const runInParallel = (data, allDone) => {
+const runInParallel = async(data, done) => {
   const ProcessClassDef = require(data.classModule);
   const taskInstance = new ProcessClassDef(data.name, data);
   taskInstance.options.multithread = false;
   taskInstance.name = data.name;
-  taskInstance.execute(allDone);
+  await taskInstance.execute();
+  done();
 };
 
 class TaskKitTask {
@@ -55,56 +56,41 @@ class TaskKitTask {
     this.options = newOptions;
   }
 
-  execute(allDone) {
+  async execute() {
     if (this.options.multithread) {
-      const options = Object.assign({}, this.options);
-      options.classModule = this.classModule;
-      options.multithread = false;
-      options.name = this.name;
-      const thread = spawn(runInParallel);
-      thread.send(options)
+      return new Promise((resolve, reject) => {
+        const options = Object.assign({}, this.options);
+        options.classModule = this.classModule;
+        options.multithread = false;
+        options.name = this.name;
+        const thread = spawn(runInParallel);
+        thread.send(options)
         .on('message', (response) => {
           thread.kill();
-          return allDone(null, response);
+          resolve(response)
         })
         .on('error', (error) => {
-          allDone(error);
+          reject(error);
         })
         .on('exit', () => {});
-      return;
+      });
     }
     const items = this.options.files || this.options.items;
     if (!items) {
-      this.log(['warning'], 'No input files, skipping');
-      return allDone();
+      return this.log(['warning'], 'No input files, skipping');
     }
     if (this.options.enabled === false) {
-      this.log(`${this.name} skipped because it is disabled`);
-      return allDone();
+      return this.log(`${this.name} skipped because it is disabled`);
     }
     const filenames = Object.keys(items);
     const originalOptions = this.options;
     // must be done sequentially so that this.options does not get changed
     // in between calls to .process:
-    async.map(filenames, (outputFile, eachDone) => {
+    let results = filenames.map(async(outputFile) => {
       const item = items[outputFile];
       let inputName = item;
       if (typeof item === 'object' && item.input) {
         inputName = item.input;
-      }
-      const start = new Date().getTime();
-      const processDone = (err, results) => {
-        if (err) {
-          return eachDone(err);
-        }
-        const end = new Date().getTime();
-        const duration = (end - start) / 1000;
-        this.log(`Processed ${outputFile} in ${duration} sec`);
-        eachDone(null, results);
-      };
-      // if process was designed to take in a local options param:
-      if (this.process.length === 3) {
-        return this.process(inputName, outputFile, processDone);
       }
       // make sure we have fresh options:
       const options = Object.assign({}, originalOptions);
@@ -116,33 +102,38 @@ class TaskKitTask {
           }
         });
       }
-      this.process(inputName, outputFile, options, processDone);
-    }, (err, results) => {
-      if (err) {
-        return allDone(err);
-      }
-      this.onFinish(results, allDone);
+      const start = new Date().getTime();
+      const result = this.process(inputName, outputFile, options);
+      const end = new Date().getTime();
+      const duration = (end - start) / 1000;
+      this.log(`Processed ${outputFile} in ${duration} sec`);
+      return result;
+    });
+    return this.onFinish(await Promise.all(results));
+  }
+
+  onFinish(results) {
+    // just return the first item if only one:
+    if (results.length === 1) {
+      results = results[0];
+    }
+    return results;
+  }
+
+  process(input, output, options) {
+    if (!options) {
+      options = {};
+    }
+    return;
+  }
+
+  async writeMany(fileContents) {
+    Object.entries(fileContents).forEach((fileName, fileContent) => {
+      this.write(fileName, fileContent);
     });
   }
 
-  onFinish(results, done) {
-    done(null, results);
-  }
-
-  process(input, output, options, done) {
-    if (typeof options === 'function') {
-      done = options;
-    }
-    done();
-  }
-
-  writeMany(fileContents, allDone) {
-    async.mapValues(fileContents, (fileContent, fileName, done) => {
-      this.write(fileName, fileContent, done);
-    }, allDone);
-  }
-
-  write(filename, contents, allDone) {
+  async write(filename, contents) {
     if (!contents) {
       this.log(['warning'], `attempting to write empty string to ${filename}`);
     }
@@ -150,39 +141,29 @@ class TaskKitTask {
     const output = path.join(this.options.dist || '', filename);
     const outputDir = path.dirname(output);
 
-    async.autoInject({
-      mkdir(done) {
-        if (!outputDir) {
-          return done();
-        }
-        mkdirp(outputDir, done);
-      },
-      write(mkdir, done) {
-        //TODO: better check of stream
-        if (typeof contents === 'string') {
-          fs.writeFile(output, contents, done);
-        } else {
-          const fileStream = fs.createWriteStream(output);
-          contents.on('error', function (err) {
-            self.log(['error'], err);
-            this.emit('end');
-          });
-          fileStream.on('finish', done);
-          contents.pipe(fileStream);
-        }
-      },
-      size(write, done) {
-        if (typeof contents === 'string') {
-          const size = bytesize.stringSize(contents, true);
-          return done(null, size);
-        }
-        bytesize.fileSize(output, true, done);
-      },
-      log(size, done) {
-        self.log(`Writing file ${filename} (${size})`);
-        done();
-      }
-    }, allDone);
+    if (!outputDir) {
+      return;
+    }
+    await mkdirp(outputDir);
+    //TODO: better check of stream
+    if (typeof contents === 'string') {
+      await util.promisify(fs.writeFile)(output, contents);
+    } else {
+      const fileStream = fs.createWriteStream(output);
+      contents.on('error', function (err) {
+        self.log(['error'], err);
+        this.emit('end');
+      });
+      fileStream.on('finish', done);
+      contents.pipe(fileStream);
+    }
+    if (typeof contents === 'string') {
+      const size = bytesize.stringSize(contents, true);
+      return size;
+    }
+    const size = await util.promisify(bytesize.fileSize)(output, true);
+    self.log(`Writing file ${filename} (${size})`);
+    return size;
   }
 }
 
