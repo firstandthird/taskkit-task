@@ -87,7 +87,7 @@ class TaskKitTask {
     const originalOptions = this.options;
     // must be done sequentially so that this.options does not get changed
     // in between calls to .process:
-    let results = filenames.map(async(outputFile) => {
+    let results = filenames.map((outputFile) => {
       const item = items[outputFile];
       let inputName = item;
       if (typeof item === 'object' && item.input) {
