@@ -128,8 +128,8 @@ class TaskKitTask {
   }
 
   async writeMany(fileContents) {
-    Object.entries(fileContents).forEach((fileName, fileContent) => {
-      this.write(fileName, fileContent);
+    Object.keys(fileContents).forEach(async(fileName) => {
+      await this.write(fileName, fileContents[fileName]);
     });
   }
 

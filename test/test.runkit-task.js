@@ -202,7 +202,7 @@ test('writeMany files to dist directory ', async(t) => {
       output1: 'input1'
     }
   }, {});
-  const outcome = await task.writeMany({
+  await task.writeMany({
     'output1.txt': 'contents1',
     'output2.txt': 'contents2'
   });
