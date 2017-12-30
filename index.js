@@ -128,9 +128,7 @@ class TaskKitTask {
   }
 
   async writeMany(fileContents) {
-    Object.keys(fileContents).forEach(async(fileName) => {
-      await this.write(fileName, fileContents[fileName]);
-    });
+    return Promise.all(Object.keys(fileContents).map(fileName => this.write(fileName, fileContents[fileName])));
   }
 
   async write(filename, contents) {
