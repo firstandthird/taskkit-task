@@ -87,7 +87,7 @@ class TaskKitTask {
     const originalOptions = this.options;
     // must be done sequentially so that this.options does not get changed
     // in between calls to .process:
-    let results = filenames.map((outputFile) => {
+    let results = filenames.map(async(outputFile) => {
       const item = items[outputFile];
       let inputName = item;
       if (typeof item === 'object' && item.input) {
@@ -104,7 +104,7 @@ class TaskKitTask {
         });
       }
       const start = new Date().getTime();
-      const result = this.process(inputName, outputFile, options);
+      const result = await this.process(inputName, outputFile, options);
       const end = new Date().getTime();
       const duration = (end - start) / 1000;
       this.log(`Processed ${outputFile} in ${duration} sec`);
@@ -121,7 +121,7 @@ class TaskKitTask {
     return results;
   }
 
-  process(input, output, options) {
+  async process(input, output, options) {
     if (!options) {
       options = {};
     }
@@ -153,7 +153,6 @@ class TaskKitTask {
         self.log(['error'], err);
         this.emit('end');
       });
-      fileStream.on('finish', done);
       contents.pipe(fileStream);
     }
     if (typeof contents === 'string') {
