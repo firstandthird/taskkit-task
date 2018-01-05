@@ -6,7 +6,7 @@ const bytesize = require('bytesize');
 const mkdirp = require('mkdirp-promise');
 const util = require('util');
 const writeFile = util.promisify(fs.writeFile);
-const fileSize = util.promisify(bytesize.fileSize);
+//const fileSize = util.promisify(bytesize.fileSize);
 
 class TaskKitTask {
   constructor(name, options, kit = {}) {
@@ -23,6 +23,7 @@ class TaskKitTask {
     } else {
       this.log = kit.logger;
     }
+    this.fullConfig = kit.config || {};
     this.init();
   }
   // your custom tasks can define their own default options:
@@ -132,6 +133,7 @@ class TaskKitTask {
     if (typeof contents === 'string') {
       size = bytesize.stringSize(contents, true);
     } else {
+      //TODO: needs bytesize update
       //size = await fileSize(output, true);
       size = '--';
     }

@@ -223,3 +223,4 @@ test('writeMany files to dist directory ', async(t) => {
 });
 
 test('can override logger');
+test('can pass in full config');
