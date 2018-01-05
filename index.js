@@ -4,44 +4,26 @@ const fs = require('fs');
 const aug = require('aug');
 const bytesize = require('bytesize');
 const mkdirp = require('mkdirp-promise');
-const spawn = require('threads').spawn;
-const Logr = require('logr');
 const util = require('util');
-
-// runInParallel is a wrapper for running tasks in their own process.
-// Since it runs in a different node process, it will break
-// code coverage, so it must be ignored:
-
-/* istanbul ignore next */
-const runInParallel = async(data) => {
-  const ProcessClassDef = require(data.classModule);
-  const taskInstance = new ProcessClassDef(data.name, data);
-  taskInstance.options.multithread = false;
-  taskInstance.name = data.name;
-  await taskInstance.execute();
-};
+const writeFile = util.promisify(fs.writeFile);
+const fileSize = util.promisify(bytesize.fileSize);
 
 class TaskKitTask {
-  constructor(name, options, kit) {
+  constructor(name, options, kit = {}) {
     this.name = name;
-    this.options = aug('deep', {}, this.defaultOptions, options);
-    this.kit = kit || {};
-    this.log = Logr.createLogger({
-      defaultTags: [name],
-      reporters: {
-        cliFancy: {
-          reporter: require('logr-cli-fancy')
-        },
-        bell: {
-          reporter: require('logr-reporter-bell')
+    this.options = aug(this.defaultOptions, options);
+    if (!kit.logger) {
+      this.log = (tags, msg) => {
+        if (typeof tags === 'string') {
+          console.log(tags); //eslint-disable-line no-console
+        } else {
+          console.log(`[${tags.join(',')}] ${msg}`); //eslint-disable-line no-console
         }
-      }
-    });
+      };
+    } else {
+      this.log = kit.logger;
+    }
     this.init();
-  }
-  // returns the module to load when running in a separate process:
-  get classModule() {
-    return path.join(__dirname, 'index.js');
   }
   // your custom tasks can define their own default options:
   get defaultOptions() {
@@ -60,24 +42,6 @@ class TaskKitTask {
   }
 
   async execute() {
-    if (this.options.multithread) {
-      return new Promise((resolve, reject) => {
-        const options = Object.assign({}, this.options);
-        options.classModule = this.classModule;
-        options.multithread = false;
-        options.name = this.name;
-        const thread = spawn(runInParallel);
-        thread.send(options)
-        .on('message', (response) => {
-          thread.kill();
-          resolve(response)
-        })
-        .on('error', (error) => {
-          reject(error);
-        })
-        .on('exit', () => {});
-      });
-    }
     const items = this.options.files || this.options.items;
     if (!items) {
       return this.log(['warning'], 'No input files, skipping');
@@ -87,9 +51,7 @@ class TaskKitTask {
     }
     const filenames = Object.keys(items);
     const originalOptions = this.options;
-    // must be done sequentially so that this.options does not get changed
-    // in between calls to .process:
-    let results = filenames.map(async(outputFile) => {
+    const processOne = async (outputFile) => {
       const item = items[outputFile];
       let inputName = item;
       if (typeof item === 'object' && item.input) {
@@ -111,8 +73,10 @@ class TaskKitTask {
       const duration = (end - start) / 1000;
       this.log(`Processed ${outputFile} in ${duration} sec`);
       return result;
-    });
-    return this.onFinish(await Promise.all(results));
+    };
+    const promises = filenames.map(f => processOne(f));
+    const results = await Promise.all(promises);
+    return this.onFinish(results);
   }
 
   onFinish(results) {
@@ -123,22 +87,39 @@ class TaskKitTask {
     return results;
   }
 
-  async process(input, output, options) {
+  process(input, output, options) {
     if (!options) {
       options = {};
     }
     return;
   }
 
-  async writeMany(fileContents) {
-    return Promise.all(Object.keys(fileContents).map(fileName => this.write(fileName, fileContents[fileName])));
+  writeMany(fileContents) {
+    const promises = Object.keys(fileContents).map(fileName => this.write(fileName, fileContents[fileName]));
+    return Promise.all(promises);
+  }
+
+  writeFile(filepath, contents) {
+    if (typeof contents === 'string') {
+      return writeFile(filepath, contents);
+    }
+    return new Promise((resolve, reject) => {
+      const fileStream = fs.createWriteStream(filepath);
+      contents.on('error', (err) => {
+        this.log(['error'], err);
+        this.emit('end');
+      });
+      contents.on('close', () => {
+        resolve();
+      });
+      contents.pipe(fileStream);
+    });
   }
 
   async write(filename, contents) {
     if (!contents) {
       this.log(['warning'], `attempting to write empty string to ${filename}`);
     }
-    const self = this;
     const output = path.join(this.options.dist || '', filename);
     const outputDir = path.dirname(output);
 
@@ -146,24 +127,15 @@ class TaskKitTask {
       return;
     }
     await mkdirp(outputDir);
-    //TODO: better check of stream
+    await this.writeFile(output, contents);
+    let size;
     if (typeof contents === 'string') {
-      await util.promisify(fs.writeFile)(output, contents);
+      size = bytesize.stringSize(contents, true);
     } else {
-      const fileStream = fs.createWriteStream(output);
-      contents.on('error', function (err) {
-        self.log(['error'], err);
-        this.emit('end');
-      });
-      contents.pipe(fileStream);
+      //size = await fileSize(output, true);
+      size = '--';
     }
-    if (typeof contents === 'string') {
-      const size = bytesize.stringSize(contents, true);
-      return size;
-    }
-    const size = await util.promisify(bytesize.fileSize)(output, true);
-    self.log(`Writing file ${filename} (${size})`);
-    return size;
+    this.log(`Writing file ${filename} (${size})`);
   }
 }
 

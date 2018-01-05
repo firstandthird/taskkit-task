@@ -3,6 +3,7 @@ const test = require('tap').test;
 const TaskKitTask = require('../index.js');
 const fs = require('fs');
 const util = require('util');
+const readFile = util.promisify(fs.readFile);
 
 test('can be constructed', (t) => {
   const kit = {};
@@ -12,7 +13,6 @@ test('can be constructed', (t) => {
   const task = new TaskKitTask('test', options, kit);
   t.equal(task instanceof TaskKitTask, true);
   t.equal(task.name, 'test');
-  t.equal(task.kit, kit);
   t.equal(task.options.x, 1);
   t.end();
 });
@@ -23,7 +23,7 @@ test('calls init when constructed', (t) => {
       t.end();
     }
   }
-  const task = new Test('test', {}, {});
+  new Test('test', {}, {});
 });
 
 test('can get default options', (t) => {
@@ -157,8 +157,21 @@ test('writes files to dist directory ', async(t) => {
   }, {});
   await task.write('output.txt', 'contents');
   t.equal(fs.existsSync('test/dist/output.txt'), true);
-  const data = await util.promisify(fs.readFile)('test/dist/output.txt');
+  const data = await readFile('test/dist/output.txt');
   t.equal(data.toString(), 'contents');
+});
+
+test('writes when contents is stream', async(t) => {
+  const task = new TaskKitTask('test', {
+    dist: 'test/dist',
+    items: {
+    }
+  }, {});
+  await task.write('stream.txt', fs.createReadStream(`${__dirname}/fixtures/stream.txt`));
+  t.equal(fs.existsSync('test/dist/stream.txt'), true);
+  const data = await readFile('test/dist/stream.txt');
+  t.equal(data.toString(), 'contents\n');
+  t.end();
 });
 
 test('handles input as object', async(t) => {
@@ -203,24 +216,12 @@ test('writeMany files to dist directory ', async(t) => {
     'output1.txt': 'contents1',
     'output2.txt': 'contents2'
   });
-  const readFile = util.promisify(fs.readFile);
   const data = await readFile('test/dist/output1.txt');
   t.equal(data.toString(), 'contents1');
   const data2 = await readFile('test/dist/output2.txt');
   t.equal(data2.toString(), 'contents2');
 });
 
-test('parallel execute -- will fire process on items in list in separate process', async(t) => {
-  const task = new TaskKitTask('test', {
-    multithread: true,
-    items: {
-      output1: 'input1'
-    }
-  }, {});
-  task.process = async(input, output) => {
-    // this takes place in a child_process
-    return 123;
-  };
-  await task.execute();
-  t.end();
-});
+test('can override logger');
+
+test('can write stream');

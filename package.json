@@ -4,7 +4,7 @@
   "description": "Class to use for creating taskkit tasks",
   "main": "index.js",
   "scripts": {
-    "test": "tap test/**.js"
+    "test": "tap --cov test/**.js"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/firstandthird/taskkit-task#readme",
   "dependencies": {
-    "aug": "^1.0.2",
+    "aug": "^2.0.0",
     "bytesize": "0.2.0",
     "logr": "^2.1.0",
     "logr-cli-fancy": "^0.2.0",
@@ -30,9 +30,9 @@
     "threads": "^0.10.0"
   },
   "devDependencies": {
-    "eslint": "3.13.1",
-    "eslint-config-firstandthird": "3.2.0",
-    "eslint-plugin-import": "2.2.0",
+    "eslint": "^4.14.0",
+    "eslint-config-firstandthird": "^4.3.0",
+    "eslint-plugin-import": "^2.8.0",
     "tap": "^11.0.1"
   },
   "eslintConfig": {
