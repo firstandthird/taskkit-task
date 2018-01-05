@@ -1,7 +1,8 @@
 'use strict';
-const test = require('tape');
+const test = require('tap').test;
 const TaskKitTask = require('../index.js');
 const fs = require('fs');
+const util = require('util');
 
 test('can be constructed', (t) => {
   const kit = {};
@@ -86,7 +87,7 @@ test('updates options ', (t) => {
   t.end();
 });
 
-test('execute -- will not fire if no items / files passed', (t) => {
+test('execute -- will not fire if no items / files passed', async(t) => {
   t.plan(1);
   const task = new TaskKitTask('test', {
     items: []
@@ -94,12 +95,11 @@ test('execute -- will not fire if no items / files passed', (t) => {
   task.process = () => {
     t.fail();
   };
-  task.execute(() => {
-    t.pass();
-  });
+  await task.execute();
+  t.pass();
 });
 
-test('execute -- can be disabled', (t) => {
+test('execute -- can be disabled', async(t) => {
   class DisabledTask extends TaskKitTask {
     process() {
       t.fail();
@@ -109,36 +109,33 @@ test('execute -- can be disabled', (t) => {
     items: [],
     enabled: false
   }, {});
-  task.execute(() => {
-    t.pass();
-    t.end();
-  });
+  await task.execute();
+  t.end();
 });
 
-test('execute -- will fire process on items in list', (t) => {
+test('execute -- will fire process on items in list', async(t) => {
   t.plan(3);
   const task = new TaskKitTask('test', {
     items: {
       output1: 'input1'
     }
   }, {});
-  task.process = (input, output, done) => {
+  task.process = (input, output) => {
     t.equal(input, 'input1');
     t.equal(output, 'output1');
-    done(123);
+    return 123;
   };
-  task.execute((val) => {
-    t.equal(val, 123);
-  });
+  const val = await task.execute();
+  t.equal(val, 123);
 });
 
-test('fires onFinish event ', (t) => {
+test('fires onFinish event ', async(t) => {
   t.plan(3);
   class Test extends TaskKitTask {
-    onFinish(results, done) {
+    onFinish(results) {
       t.equal(results.length, 1);
       t.equal(results[0], undefined);
-      done(123);
+      return 123;
     }
   }
   const task = new Test('test', {
@@ -146,32 +143,25 @@ test('fires onFinish event ', (t) => {
       output1: 'input1'
     }
   }, {});
-  task.execute((val) => {
-    t.equal(val, 123);
-  });
+  const val = await task.execute();
+  t.equal(val, 123);
 });
 
-test('writes files to dist directory ', (t) => {
-  t.plan(4);
+test('writes files to dist directory ', async(t) => {
+  t.plan(2);
   const task = new TaskKitTask('test', {
     dist: 'test/dist',
     items: {
       output1: 'input1'
     }
   }, {});
-  task.write('output.txt', 'contents', (err, outcome) => {
-    t.equal(err, null);
-    fs.exists('test/dist/output.txt', (exists) => {
-      t.equal(exists, true);
-      fs.readFile('test/dist/output.txt', (err2, data) => {
-        t.equal(err2, null);
-        t.equal(data.toString(), 'contents');
-      });
-    });
-  });
+  await task.write('output.txt', 'contents');
+  t.equal(fs.existsSync('test/dist/output.txt'), true);
+  const data = await util.promisify(fs.readFile)('test/dist/output.txt');
+  t.equal(data.toString(), 'contents');
 });
 
-test('handles input as object', (t) => {
+test('handles input as object', async(t) => {
   const task = new TaskKitTask('test', {
     files: {
       outputAsObject: {
@@ -186,66 +176,51 @@ test('handles input as object', (t) => {
   }, {});
   // use 'delay' so the first process ends after the second:
   let delay = 2000;
-  task.process = (input, output, options, done) => {
-    setTimeout(() => {
-      done(null, Object.keys(options));
-    }, delay);
+  task.process = async(input, output, options) => {
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    await wait(delay);
     delay = 10;
+    return Object.keys(options);
   };
-  task.execute((err, val) => {
-    t.equal(err, null);
-    t.equal(val.length, 2, 'handles files specified as objects');
-    t.equal(val[0].length, 2, 'options are correct during process');
-    t.equal(val[1].length, 2, 'options are correct during process');
-    t.equal(val[0][1], 'glop', 'options are correct during process');
-    t.equal(val[1][1], 'glyf', 'options are correct during process');
-    t.end();
-  });
+  const val = await task.execute();
+  t.equal(val.length, 2, 'handles files specified as objects');
+  t.equal(val[0].length, 2, 'options are correct during process');
+  t.equal(val[1].length, 2, 'options are correct during process');
+  t.equal(val[0][1], 'glop', 'options are correct during process');
+  t.equal(val[1][1], 'glyf', 'options are correct during process');
+  t.end();
 });
 
-test('writeMany files to dist directory ', (t) => {
-  t.plan(7);
+test('writeMany files to dist directory ', async(t) => {
+  t.plan(2);
   const task = new TaskKitTask('test', {
     dist: 'test/dist',
     items: {
       output1: 'input1'
     }
   }, {});
-  task.writeMany({
+  await task.writeMany({
     'output1.txt': 'contents1',
     'output2.txt': 'contents2'
-  }, (err, outcome) => {
-    t.equal(err, null);
-    fs.exists('test/dist/output1.txt', (exists) => {
-      t.equal(exists, true);
-      fs.readFile('test/dist/output1.txt', (err2, data) => {
-        t.equal(err2, null);
-        t.equal(data.toString(), 'contents1');
-        fs.exists('test/dist/output2.txt', (exists2) => {
-          t.equal(exists2, true);
-          fs.readFile('test/dist/output2.txt', (err3, data2) => {
-            t.equal(err3, null);
-            t.equal(data2.toString(), 'contents2');
-          });
-        });
-      });
-    });
   });
+  const readFile = util.promisify(fs.readFile);
+  const data = await readFile('test/dist/output1.txt');
+  t.equal(data.toString(), 'contents1');
+  const data2 = await readFile('test/dist/output2.txt');
+  t.equal(data2.toString(), 'contents2');
 });
 
-test('parallel execute -- will fire process on items in list in separate process', (t) => {
+test('parallel execute -- will fire process on items in list in separate process', async(t) => {
   const task = new TaskKitTask('test', {
     multithread: true,
     items: {
       output1: 'input1'
     }
   }, {});
-  task.process = (input, output, done) => {
+  task.process = async(input, output) => {
     // this takes place in a child_process
-    done(null, 123);
+    return 123;
   };
-  task.execute((err, res) => {
-    t.equal(err, null);
-    t.end();
-  });
+  await task.execute();
+  t.end();
 });
