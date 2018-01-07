@@ -197,6 +197,7 @@ test('will warn if sizeThreshold is specified and is exceeded  ', async(t) => {
   }, {});
   await task2.write('output.txt', 'contents');
   console.log = oldLog;
+  console.log(results)
   t.equal(results[0].indexOf('warning'), 1, 'logs if file size exceeds sizeThreshold');
   t.equal(results.length, 3, 'does not log warning if file size does not exceed');
   t.end();
@@ -226,7 +227,8 @@ test('will use gzip size for sizeThreshold comparisons if gzipSize is true ', as
     sizeThreshold: 200000
   }, {});
   await task2.write('output.txt', 'contents');
-  t.equal(results[0].indexOf('warning'), 1, 'logs if gzipped file size exceeds sizeThreshold');
+  console.log = oldLog;
+  t.notEqual(results[0].indexOf('gzipped size is'), -1, 'logs if gzipped file size exceeds sizeThreshold');
   t.equal(results.length, 3, 'does not log warning if gzipped file size does not exceed');
   t.end();
 });

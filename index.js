@@ -141,7 +141,7 @@ class TaskKitTask {
       readableSize = await bytesize.fileSize(output, true);
     }
     if (typeof this.options.sizeThreshold === 'number' && numericSize > this.options.sizeThreshold) {
-      this.log(['warning'], `File ${filename} size is ${readableSize} (${numericSize} bytes), exceeds threshold of ${this.options.sizeThreshold} bytes`);
+      this.log(['warning'], `File ${filename} ${this.options.gzipSize ? 'gzipped' : ''} size is ${readableSize} (${numericSize} bytes), exceeds threshold of ${this.options.sizeThreshold} bytes`);
     }
     this.log(`Writing file ${filename} (${readableSize})`);
   }
