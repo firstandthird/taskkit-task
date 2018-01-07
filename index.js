@@ -130,12 +130,12 @@ class TaskKitTask {
     await this.writeFile(output, contents);
     let numericSize;
     let readableSize;
-    if (typeof contents === 'string') {
-      numericSize = bytesize.stringSize(contents, false);
-      readableSize = bytesize.stringSize(contents, true);
-    } else if (this.options.gzipSize) {
+    if (this.options.gzipSize) {
       numericSize = await bytesize.gzipSize(output, false);
       readableSize = await bytesize.gzipSize(output, true);
+    } else if (typeof contents === 'string') {
+      numericSize = bytesize.stringSize(contents, false);
+      readableSize = bytesize.stringSize(contents, true);
     } else {
       numericSize = await bytesize.fileSize(output, false);
       readableSize = await bytesize.fileSize(output, true);

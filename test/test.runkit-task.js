@@ -197,7 +197,6 @@ test('will warn if sizeThreshold is specified and is exceeded  ', async(t) => {
   }, {});
   await task2.write('output.txt', 'contents');
   console.log = oldLog;
-  console.log(results)
   t.equal(results[0].indexOf('warning'), 1, 'logs if file size exceeds sizeThreshold');
   t.equal(results.length, 3, 'does not log warning if file size does not exceed');
   t.end();
