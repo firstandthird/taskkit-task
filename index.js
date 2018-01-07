@@ -109,9 +109,7 @@ class TaskKitTask {
         this.log(['error'], err);
         this.emit('end');
       });
-      contents.on('close', () => {
-        return resolve(writeFileAsync(filepath, contents));
-      });
+      contents.on('close', () => resolve(writeFileAsync(filepath, contents)));
       contents.pipe(fileStream);
     });
   }
