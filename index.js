@@ -128,7 +128,6 @@ class TaskKitTask {
     let numericSize;
     let readableSize;
     if (this.options.gzipSize) {
-      // needs to be gzipStringSize
       numericSize = await bytesize.gzipStringSize(contents, false);
       readableSize = await bytesize.gzipStringSize(contents, true);
     } else {
