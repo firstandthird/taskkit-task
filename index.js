@@ -5,7 +5,7 @@ const aug = require('aug');
 const bytesize = require('bytesize');
 const mkdirp = require('mkdirp-promise');
 const util = require('util');
-const writeFile = util.promisify(fs.writeFile);
+const writeFileAsync = util.promisify(fs.writeFile);
 
 class TaskKitTask {
   constructor(name, options, kit = {}) {
@@ -100,17 +100,17 @@ class TaskKitTask {
   }
 
   writeFile(filepath, contents) {
-    if (typeof contents === 'string') {
-      return writeFile(filepath, contents);
-    }
     return new Promise((resolve, reject) => {
+      if (typeof contents === 'string') {
+        return resolve(writeFileAsync(filepath, contents));
+      }
       const fileStream = fs.createWriteStream(filepath);
       contents.on('error', (err) => {
         this.log(['error'], err);
         this.emit('end');
       });
       contents.on('close', () => {
-        resolve();
+        return resolve(writeFileAsync(filepath, contents));
       });
       contents.pipe(fileStream);
     });
@@ -133,12 +133,9 @@ class TaskKitTask {
     if (this.options.gzipSize) {
       numericSize = await bytesize.gzipSize(output, false);
       readableSize = await bytesize.gzipSize(output, true);
-    } else if (typeof contents === 'string') {
+    } else {
       numericSize = bytesize.stringSize(contents, false);
       readableSize = bytesize.stringSize(contents, true);
-    } else {
-      numericSize = await bytesize.fileSize(output, false);
-      readableSize = await bytesize.fileSize(output, true);
     }
     if (typeof this.options.sizeThreshold === 'number' && numericSize > this.options.sizeThreshold) {
       this.log(['warning'], `File ${filename} ${this.options.gzipSize ? 'gzipped' : ''} size is ${readableSize} (${numericSize} bytes), exceeds threshold of ${this.options.sizeThreshold} bytes`);
