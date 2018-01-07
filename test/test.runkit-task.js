@@ -174,6 +174,63 @@ test('writes when contents is stream', async(t) => {
   t.end();
 });
 
+test('will warn if sizeThreshold is specified and is exceeded  ', async(t) => {
+  const oldLog = console.log;
+  const results = [];
+  console.log = (input) => {
+    results.push(input);
+  };
+  const task = new TaskKitTask('test', {
+    dist: 'test/dist',
+    items: {
+      output1: 'input1'
+    },
+    sizeThreshold: 1
+  }, {});
+  await task.write('output.txt', 'contents');
+  const task2 = new TaskKitTask('test', {
+    dist: 'test/dist',
+    items: {
+      output1: 'input1'
+    },
+    sizeThreshold: 200000
+  }, {});
+  await task2.write('output.txt', 'contents');
+  console.log = oldLog;
+  t.equal(results[0].indexOf('warning'), 1, 'logs if file size exceeds sizeThreshold');
+  t.equal(results.length, 3, 'does not log warning if file size does not exceed');
+  t.end();
+});
+
+test('will use gzip size for sizeThreshold comparisons if gzipSize is true ', async(t) => {
+  const oldLog = console.log;
+  const results = [];
+  console.log = (input) => {
+    results.push(input);
+  };
+  const task = new TaskKitTask('test', {
+    dist: 'test/dist',
+    items: {
+      output1: 'input1'
+    },
+    gzipSize: true,
+    sizeThreshold: 1
+  }, {});
+  await task.write('output.txt', 'contents');
+  const task2 = new TaskKitTask('test', {
+    dist: 'test/dist',
+    items: {
+      output1: 'input1'
+    },
+    gzipSize: true,
+    sizeThreshold: 200000
+  }, {});
+  await task2.write('output.txt', 'contents');
+  t.equal(results[0].indexOf('warning'), 1, 'logs if gzipped file size exceeds sizeThreshold');
+  t.equal(results.length, 3, 'does not log warning if gzipped file size does not exceed');
+  t.end();
+});
+
 test('handles input as object', async(t) => {
   const task = new TaskKitTask('test', {
     files: {

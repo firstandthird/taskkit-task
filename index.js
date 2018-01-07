@@ -6,7 +6,6 @@ const bytesize = require('bytesize');
 const mkdirp = require('mkdirp-promise');
 const util = require('util');
 const writeFile = util.promisify(fs.writeFile);
-//const fileSize = util.promisify(bytesize.fileSize);
 
 class TaskKitTask {
   constructor(name, options, kit = {}) {
@@ -129,15 +128,22 @@ class TaskKitTask {
     }
     await mkdirp(outputDir);
     await this.writeFile(output, contents);
-    let size;
+    let numericSize;
+    let readableSize;
     if (typeof contents === 'string') {
-      size = bytesize.stringSize(contents, true);
+      numericSize = bytesize.stringSize(contents, false);
+      readableSize = bytesize.stringSize(contents, true);
+    } else if (this.options.gzipSize) {
+      numericSize = await bytesize.gzipSize(output, false);
+      readableSize = await bytesize.gzipSize(output, true);
     } else {
-      //TODO: needs bytesize update
-      //size = await fileSize(output, true);
-      size = '--';
+      numericSize = await bytesize.fileSize(output, false);
+      readableSize = await bytesize.fileSize(output, true);
     }
-    this.log(`Writing file ${filename} (${size})`);
+    if (typeof this.options.sizeThreshold === 'number' && numericSize > this.options.sizeThreshold) {
+      this.log(['warning'], `File ${filename} size is ${readableSize} (${numericSize} bytes), exceeds threshold of ${this.options.sizeThreshold} bytes`);
+    }
+    this.log(`Writing file ${filename} (${readableSize})`);
   }
 }
 
