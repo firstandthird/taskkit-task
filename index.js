@@ -100,24 +100,23 @@ class TaskKitTask {
   }
 
   writeFile(filepath, contents) {
-    return new Promise((resolve, reject) => {
-      if (typeof contents === 'string') {
-        return resolve(writeFileAsync(filepath, contents));
-      }
-      const fileStream = fs.createWriteStream(filepath);
-      contents.on('error', (err) => {
-        this.log(['error'], err);
-        this.emit('end');
-      });
-      contents.on('close', () => resolve(writeFileAsync(filepath, contents)));
-      contents.pipe(fileStream);
-    });
+    return writeFileAsync(filepath, contents);
   }
 
   async write(filename, contents) {
     if (!contents) {
       this.log(['warning'], `attempting to write empty string to ${filename}`);
     }
+    // if contents is a stream then get it as a string:
+    contents = typeof contents === 'string' ? contents : await new Promise((resolve, reject) => {
+      const chunks = [];
+      contents.on('error', (err) => {
+        this.log(['error'], err);
+        this.emit('end');
+      });
+      contents.on('data', (data) => { chunks.push(data); });
+      contents.on('close', () => resolve(Buffer.concat(chunks).toString()));
+    });
     const output = path.join(this.options.dist || '', filename);
     const outputDir = path.dirname(output);
 
@@ -129,8 +128,9 @@ class TaskKitTask {
     let numericSize;
     let readableSize;
     if (this.options.gzipSize) {
-      numericSize = await bytesize.gzipSize(output, false);
-      readableSize = await bytesize.gzipSize(output, true);
+      // needs to be gzipStringSize
+      numericSize = await bytesize.gzipStringSize(contents, false);
+      readableSize = await bytesize.gzipStringSize(contents, true);
     } else {
       numericSize = bytesize.stringSize(contents, false);
       readableSize = bytesize.stringSize(contents, true);

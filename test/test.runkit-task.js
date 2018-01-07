@@ -170,7 +170,7 @@ test('writes when contents is stream', async(t) => {
   await task.write('stream.txt', fs.createReadStream(`${__dirname}/fixtures/stream.txt`));
   t.equal(fs.existsSync('test/dist/stream.txt'), true);
   const data = await readFile('test/dist/stream.txt');
-  t.equal(data.toString(), 'contents\n');
+  t.equal(data.toString().startsWith('contents'), true);
   t.end();
 });
 
