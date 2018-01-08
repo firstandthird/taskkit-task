@@ -88,6 +88,7 @@ test('updates options ', (t) => {
 });
 
 test('execute -- will not fire if no items / files passed', async(t) => {
+  t.plan(1);
   const task = new TaskKitTask('test', {
     items: []
   }, {});
@@ -95,6 +96,7 @@ test('execute -- will not fire if no items / files passed', async(t) => {
     t.fail();
   };
   await task.execute();
+  t.pass();
 });
 
 test('execute -- will warn if no items / files passed', async(t) => {
