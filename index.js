@@ -35,6 +35,10 @@ class TaskKitTask {
     return '';
   }
 
+  get usesAsync() {
+    return true;
+  }
+
   init() {
   }
 
