@@ -100,10 +100,6 @@ class TaskKitTask {
     return Promise.all(promises);
   }
 
-  writeFile(filepath, contents) {
-    return writeFileAsync(filepath, contents);
-  }
-
   async write(filename, contents) {
     if (!contents) {
       this.log(['warning'], `attempting to write empty string to ${filename}`);
@@ -125,7 +121,7 @@ class TaskKitTask {
       return;
     }
     await mkdirp(outputDir);
-    await this.writeFile(output, contents);
+    await writeFileAsync(output, contents);
     let numericSize;
     let readableSize;
     if (this.options.gzipSize) {
