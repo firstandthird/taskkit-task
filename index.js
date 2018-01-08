@@ -87,7 +87,7 @@ class TaskKitTask {
     return results;
   }
 
-  // this is where the work gets done:
+  // tasks should override process to do any work:
   process(input, output, options) {
     return;
   }
