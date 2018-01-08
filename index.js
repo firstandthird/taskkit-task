@@ -87,10 +87,8 @@ class TaskKitTask {
     return results;
   }
 
+  // this is where the work gets done:
   process(input, output, options) {
-    if (!options) {
-      options = {};
-    }
     return;
   }
 
@@ -112,17 +110,14 @@ class TaskKitTask {
       const chunks = [];
       contents.on('error', (err) => {
         this.log(['error'], err);
-        this.emit('end');
+        reject(err);
       });
       contents.on('data', (data) => { chunks.push(data); });
       contents.on('close', () => resolve(Buffer.concat(chunks).toString()));
     });
     const output = path.join(this.options.dist || '', filename);
     const outputDir = path.dirname(output);
-
-    if (!outputDir) {
-      return;
-    }
+    // mkdirp will create any output directory if it doesn't exist:
     await mkdirp(outputDir);
     await this.writeFile(output, contents);
     let numericSize;
