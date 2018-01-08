@@ -12,17 +12,14 @@ class TaskKitTask {
   constructor(name, options, kit = {}) {
     this.name = name;
     this.options = aug(this.defaultOptions, options);
-    if (!kit.logger) {
-      this.log = (tags, msg) => {
-        if (typeof tags === 'string') {
-          console.log(tags); //eslint-disable-line no-console
-        } else {
-          console.log(`[${tags.join(',')}] ${msg}`); //eslint-disable-line no-console
-        }
-      };
-    } else {
-      this.log = kit.logger;
-    }
+    this.log = kit.logger || function(tags, msg) {
+      if (typeof tags === 'string') {
+        console.log(tags); //eslint-disable-line no-console
+      } else {
+        console.log(`[${tags.join(',')}] ${msg}`); //eslint-disable-line no-console
+      }
+    };
+    this.runTask = kit.runTask || function(task) { this.log(['warning'], `not able to run ${task}`); };
     this.fullConfig = kit.config || {};
     this.init();
   }

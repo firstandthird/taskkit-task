@@ -4,7 +4,7 @@
   "description": "Class to use for creating taskkit tasks",
   "main": "index.js",
   "scripts": {
-    "test": "tap --cov test/**.js"
+    "test": "eslint . && tap --cov test/**.js"
   },
   "repository": {
     "type": "git",
