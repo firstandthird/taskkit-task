@@ -21,19 +21,20 @@
   },
   "homepage": "https://github.com/firstandthird/taskkit-task#readme",
   "dependencies": {
-    "aug": "^2.0.0",
+    "aug": "^3.1.1",
     "bytesize": "^1.1.0",
-    "logr": "^2.1.0",
+    "logr": "^3.0.0",
     "logr-cli-fancy": "^0.2.0",
     "logr-reporter-bell": "0.0.1",
-    "mkdirp-promise": "^5.0.1",
-    "threads": "^0.10.0"
+    "mkdir-promise": "^1.0.0",
+    "mkdirp": "^1.0.3"
   },
   "devDependencies": {
-    "eslint": "^4.14.0",
-    "eslint-config-firstandthird": "^4.3.0",
-    "eslint-plugin-import": "^2.8.0",
-    "tap": "^11.0.1"
+    "eslint": "^6.8.0",
+    "eslint-config-firstandthird": "^5.0.0",
+    "eslint-plugin-import": "^2.20.1",
+    "rimraf": "^3.0.2",
+    "tap": "^14.10.6"
   },
   "eslintConfig": {
     "extends": "firstandthird"
