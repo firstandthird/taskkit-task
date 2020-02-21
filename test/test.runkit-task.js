@@ -1,9 +1,15 @@
 'use strict';
-const test = require('tap').test;
+const tap = require('tap');
+const test = tap.test;
 const TaskKitTask = require('../index.js');
 const fs = require('fs');
 const util = require('util');
 const readFile = util.promisify(fs.readFile);
+const rimraf = require('rimraf');
+
+tap.afterEach(done => {
+  rimraf('test/dist', () => done());
+});
 
 test('can be constructed', (t) => {
   const kit = {};

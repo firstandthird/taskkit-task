@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const aug = require('aug');
 const bytesize = require('bytesize');
-const mkdirp = require('mkdirp-promise');
+const mkdirp = require('mkdir-promise');
 const util = require('util');
 const writeFileAsync = util.promisify(fs.writeFile);
 
